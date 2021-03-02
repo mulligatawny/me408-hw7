@@ -1,8 +1,9 @@
+###############################################################################
+# 1D Burgers' Equation Solver using Galerkin's Method and Fourier expansions  #
+###############################################################################
+
 import numpy as np
 import matplotlib.pyplot as plt
-import time
-
-start = time.time()
 
 N = 64
 nu = 0.4
@@ -45,4 +46,3 @@ plt.legend()
 plt.xlabel('$x$')
 plt.ylabel('$u$')
 plt.show()
-print(end-start)
