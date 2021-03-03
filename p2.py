@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from transforms import cheby
 
-N = 32
+N = 16
 t = np.arange(0, N+1)*np.pi/N # uniform grid
 #x = np.flip(np.cos(t))        # Chebyshev grid
 x = np.cos(t)
@@ -24,30 +24,37 @@ def fun(t, y):
                 s = s + 2*p*y[p]
     return -s
 
-dt = 0.000005
+dt = 0.0001
 t = 0.0
 y = y0
 yn = np.zeros_like(x, dtype='complex')
 
 # Runge-Kutta IV time integrator
+#while t < 0.2:
+#    for i in range(N):
+#        k1 = dt*fun(t, y)
+#        k2 = dt*fun(t+dt/2, y+k1/2)
+#        k3 = dt*fun(t+dt/2, y+k2/2)
+#        k4 = dt*fun(t+dt, y+k3)
+#        yn[i] = y[i] + k1/6 + k2/3 + k3/3 + k4/6
+##    yn[N] = -sum(yn[:-1:2]) + sum(yn[1::2])
+#    y = yn
+#    t = t + dt
+
 while t < 1:
     for i in range(N):
-        k1 = dt*fun(t, y)
-        k2 = dt*fun(t+dt/2, y+k1/2)
-        k3 = dt*fun(t+dt/2, y+k2/2)
-        k4 = dt*fun(t+dt, y+k3)
-        yn[i] = y[i] + k1/6 + k2/3 + k3/3 + k4/6
+        yn[i] = y[i] + dt*fun(t, y)
     yn[N] = -sum(yn[:-1:2]) + sum(yn[1::2])
-#    print(yn[N])
-#    print(yn)
     y = yn
     t = t + dt
 
-#plt.plot(k, np.real(yn))
+ue = np.roll(u0, -1)
+
 ye = cheby.icheby(yn)
-plt.plot(x, np.real(ye))
+plt.plot(x, np.real(ye), color='salmon', label='numerical')
+plt.plot(x, ue, 'k-.', label='analytical')
+plt.xlabel('$x$')
+#plt.ylim([-0.1,1])
+plt.ylabel('$u$')
+plt.title('Solution without BC at t = {:.2f}'.format(t))
 plt.show()
-
-            
-
-

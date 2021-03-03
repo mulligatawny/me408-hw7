@@ -1,60 +1,62 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-N = 64
+N = 32
 x = np.linspace(0, 2*np.pi, N+1)[:-1]
 y = np.sin(4*x) + 0.15*np.sin(14*x)
+yp = 4*np.cos(4*x) + 2.1*np.cos(14*x)
+k = np.arange(-N/2, N/2)
 
-# one-sided finite difference to compute derivative
-def compute_der(y):
-    dx = 2*np.pi/N
-    yp = np.zeros_like(y)
-    yp[1:] = (y[1:] - y[0:-1])/dx
-    yp[0] = (y[0]-y[-1])/dx
-    return yp
-# FFT 
-def compute_FFT(y):
-    return (np.fft.fft(y))/N
+# LHS = y*(dy/dx)
+Fk = np.fft.fftshift(np.fft.fft(y))/N
+dydx = np.fft.ifft(np.fft.ifftshift(1j*k*Fk))*N
+LHS = y*dydx
+# RHS = d((y**2)/2)/dx
+Fk2 = np.fft.fftshift(np.fft.fft(0.5*y**2))/N
+RHS = np.fft.ifft(np.fft.ifftshift(1j*k*Fk2))*N
 
-def compute_IFFT(Fk):
-    return np.fft.ifft(Fk)*N
+fig1 = plt.figure(1)
+plt.plot(x, np.real(LHS), 'r.-', label='LHS')
+plt.plot(x, np.real(RHS), 'g--', label='RHS')
+plt.plot(x, y*yp, 'ko', label='exact')
+plt.xlabel('$x$')
+plt.ylabel('LHS, RHS')
+plt.title('Without de-aliasing')
+plt.grid()
+plt.legend()
 
-def unaliased(y):
-    LHS = y*compute_der(y)
-    RHS = compute_der((y**2)/2)
-    Fk_LHS = compute_FFT(LHS)
-    Fk_RHS = compute_FFT(RHS)
-    k = np.arange(-N/2, N/2)
-    k = np.fft.fftshift(k)
+# de-aliasing the LHS
+def compute_FFT(f):
+    return np.fft.fftshift(np.fft.fft(f))/len(f)
 
-#    plt.plot(k, np.abs(Fk_LHS), 'ro-', label='LHS')
-#    plt.plot(k, np.abs(Fk_RHS), 'ko-', label='RHS')
-#    plt.plot(x, np.real(compute_IFFT(Fk_LHS)), label='LHS-aliased')
-#    plt.plot(x, np.real(compute_IFFT(Fk_RHS)))
-    plt.xlabel('$k$')
-    plt.ylabel('Fourier coefficients')
-    plt.legend()
-unaliased(y)
+def compute_IFFT(F):
+    return np.fft.ifft(np.fft.ifftshift(F))*len(F)
 
-u_L = y
-# Step 1: perform FFT on u
-Fu_L = compute_FFT(u_L)
-# Step 2: pad coefficients with 0s
-Fu_L = np.pad(Fu_L, int(N/4), 'constant') # pad with zeros
-# Step 3: inverse transform to get u'
-u_Lr = compute_IFFT(Fu_L)
+u = y
+Fu = compute_FFT(u)
+Fu = np.pad(Fu, int(N/4), 'constant')
+ur = compute_IFFT(Fu)
 
-# Same for v
-v_L = compute_der(y)
-Fv_L = compute_FFT(v_L)
-Fv_L = np.pad(Fv_L, int(N/4), 'constant')
-v_Lr = compute_IFFT(Fv_L)
+v = y/2
+Fv = compute_FFT(v)
+Fv = np.pad(Fv, int(N/4), 'constant')
+vr = compute_IFFT(Fv)
 
-# Step 4: perform FFT on u'v'
-upvp_L = compute_FFT(u_Lr*v_Lr)
-# Step 5: truncate coefficients
-tr_L = upvp_L[int(N/4):int(N+N/4)]
-# Step 6: inverse transform to get uv
-LHS = compute_IFFT(tr_L)
-#plt.plot(x, np.real(LHS), 'ro-', label='LHS-unaliased')
+uv = ur*vr
+Fuv = compute_FFT(uv)
+Tuv = Fuv[int(N/4):int(N+N/4)]
+uvr = compute_IFFT(Tuv)
+
+Fuvr = compute_FFT(uvr)
+RHSd = compute_IFFT(1j*k*Fuvr)
+
+fig2 = plt.figure(2)
+plt.plot(x, np.real(LHS), 'r.-', label='LHS')
+plt.plot(x, np.real(RHSd), 'g.--', label='RHS')
+plt.plot(x, y*yp, 'ko', label='exact')
+plt.xlabel('$x$')
+plt.ylabel('LHS, RHS')
+plt.title('With de-aliasing')
+plt.grid()
+plt.legend()
 plt.show()

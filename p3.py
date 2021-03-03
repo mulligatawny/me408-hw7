@@ -10,7 +10,6 @@ f = y1*y2
 Fk = np.fft.fft(f)/N
 Fk = np.fft.fftshift(Fk)
 k = np.arange(-N/2, N/2)
-#k = np.fft.fftshift(k)
 
 # product defined analytically
 N2 = 256
@@ -23,11 +22,11 @@ Fkt = np.fft.fft(y3)/N2
 Fkt = np.fft.fftshift(Fkt)
 k2 = np.arange(-N2/2, N2/2)
 
-print(np.abs(Fk))
-plt.plot(k, np.abs(Fk), '-o',color='teal')
-plt.plot(k2, np.abs(Fkt), '-',color='orangered')
+plt.plot(k, np.abs(Fk), '-o',color='teal', label='aliased')
+plt.plot(k2, np.abs(Fkt), '-',color='orangered', label='de-aliased')
 plt.ylabel('Fourier coefficients')
 plt.xlabel('$k$')
 plt.xlim([-17,17])
 plt.grid('on')
+plt.legend()
 plt.show()

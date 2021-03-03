@@ -1,7 +1,3 @@
-###############################################################################
-# 1D Burgers' Equation Solver using Galerkin's Method and Fourier expansions  #
-###############################################################################
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -38,7 +34,6 @@ while t < 0.2:
     y = yn
     t = t + dt
 
-end = time.time()
 ye = np.fft.ifft(y)*N
 plt.plot(x, u0, 'k-', label='I.C.')
 plt.plot(x, np.real(ye), 'o-', color='orangered', label='t = {:.1f}'.format(t))
