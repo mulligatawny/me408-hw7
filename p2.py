@@ -33,7 +33,7 @@ t = 0.0
 y = y0
 yn = np.zeros_like(x, dtype='complex')
 
- Runge-Kutta IV time integrator
+# Runge-Kutta IV time integrator
 while t < 0.2:
     for i in range(N):
         k1 = dt*fun(t, y)
