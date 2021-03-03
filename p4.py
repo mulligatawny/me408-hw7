@@ -1,3 +1,4 @@
+# 4/4 De-aliasing
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -1,3 +1,7 @@
+###############################################################################
+# 1D Burgers' Equation Solver using Galerkin's Method and Fourier expansions  #
+###############################################################################
+
 import numpy as np
 import matplotlib.pyplot as plt
 
